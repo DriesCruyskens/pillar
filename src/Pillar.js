@@ -133,6 +133,6 @@ export default class Pillar {
     exportSVG() {
         var svg = paper.project.exportSVG({asString: true});
         var blob = new Blob([svg], {type: "image/svg+xml;charset=utf-8"});
-        saveAs(blob, 'chromecloth' + JSON.stringify(this.params) + '.svg');
+        saveAs(blob, 'pillar' + JSON.stringify(this.params) + '.svg');
     }
 }
