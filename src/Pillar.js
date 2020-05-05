@@ -7,6 +7,7 @@ export default class Pillar {
   constructor(canvas_id) {
     this.params = {
       strokeWidth: 1.0,
+      drawFabric: false,
 
       seed: Math.random() * 2000,
       smoothing: 100,
@@ -16,7 +17,7 @@ export default class Pillar {
       height: 0.7,
       width: 0.3,
       n_lines: 300,
-      n_vertices: 1,
+      n_vertices: 100,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
@@ -73,7 +74,7 @@ export default class Pillar {
       marginY = (viewHeight - viewHeight * this.params.height) / 2;
 
       // j needs to be smaller or equal to n_vertices
-      // for the sketch to be centered. 
+      // for the sketch to be centered.
       for (let j = 0; j <= n_vertices; j++) {
         x1 = marginX + ((viewWidth * this.params.width) / n_vertices) * j;
         y1 = marginY + ((viewHeight * this.params.height) / n_lines) * i;
@@ -92,6 +93,18 @@ export default class Pillar {
 
       path.smooth();
     }
+
+    if (this.params.drawFabric) {
+      // Got to make a copy otherwise the forEach includes new paths.
+      const children = [...paper.project.activeLayer.children];
+      for (let i = 0; i < n_vertices; i++) {
+        let p = new paper.Path();
+        children.forEach((x) => {
+          p.add(x._segments[i]._point);
+        });
+        p.smooth();
+      }
+    }
   }
 
   init_gui() {
@@ -108,7 +121,7 @@ export default class Pillar {
       });
 
     shape
-      .add(this.params, "n_vertices", 1, 20)
+      .add(this.params, "n_vertices", 1, 500)
       .step(1)
       .onChange((value) => {
         this.params.n_vertices = value;
@@ -142,7 +155,7 @@ export default class Pillar {
       });
 
     noise
-      .add(this.params, "smoothing", 0, 2000)
+      .add(this.params, "smoothing", 0, 200)
       .step(0.001)
       .onChange((value) => {
         this.params.smoothing = value;
@@ -174,6 +187,11 @@ export default class Pillar {
         this.params.strokeWidth = value;
         this.reset();
       });
+
+    style.add(this.params, "drawFabric").onChange((value) => {
+      this.params.drawFabric = value;
+      this.reset();
+    });
 
     this.gui.add(this, "exportSVG").name("Export SVG");
   }
