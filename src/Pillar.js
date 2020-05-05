@@ -88,41 +88,41 @@ export default class Pillar {
 
         let shape = this.gui.addFolder('shape');
 
-        shape.add(this.params, 'n_lines', 0, 500).onChange((value) => {
+        shape.add(this.params, 'n_lines', 0, 500).step(0.001).onChange((value) => {
             this.params.n_lines = value;
             this.reset();
         });
 
-        shape.add(this.params, 'width', 0, 1).onChange((value) => {
+        shape.add(this.params, 'width', 0, 1).step(0.001).onChange((value) => {
             this.params.width = value;
             this.reset();
         });
 
-        shape.add(this.params, 'height', 0, 1).onChange((value) => {
+        shape.add(this.params, 'height', 0, 1).step(0.001).onChange((value) => {
             this.params.height = value;
             this.reset();
         });
 
         let noise = this.gui.addFolder('noise');
 
-        noise.add(this.params, 'seed', 0, 2000).onChange((value) => {
+        noise.add(this.params, 'seed', 0, 2000).step(0.001).onChange((value) => {
             this.params.seed = value;
             this.reset();
         });
         
-        noise.add(this.params, 'smoothing', 0, 200).onChange((value) => {
+        noise.add(this.params, 'smoothing', 0, 200).step(0.001).onChange((value) => {
             this.params.smoothing = value;
             this.reset();
         });
 
-        noise.add(this.params, 'amp', 0, 200).onChange((value) => {
+        noise.add(this.params, 'amp', 0, 200).step(0.001).onChange((value) => {
             this.params.amp = value;
             this.reset();
         });
 
         let style = this.gui.addFolder("style");
 
-        style.add(this.params, 'strokeWidth', 0, 5).onChange((value) => {
+        style.add(this.params, 'strokeWidth', 0, 5).step(0.001).onChange((value) => {
             this.params.strokeWidth = value;
             this.reset();
         })
