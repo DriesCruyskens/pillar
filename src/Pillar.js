@@ -11,12 +11,12 @@ export default class Pillar {
 
             seed: Math.random() * 2000,
             smoothing: 100,
-            amp: 40,
+            ampX: 40,
+            ampY: 40,
 
             height: .7,
             width: .3,
             n_lines: 300,
-            n_vertices: 30,
         }
 
         Number.prototype.map = function (in_min, in_max, out_min, out_max) {
@@ -56,8 +56,10 @@ export default class Pillar {
     }
 
     draw() {
-        let x1, y1, x2, y2, marginX, marginY;
+        let x1, y1, x2, y2, marginX, marginY, path;
         for (let i = 0; i < this.params.n_lines; i++ ) {
+            path = new paper.Path()
+
             marginX = (paper.view.bounds.width - (paper.view.bounds.width * this.params.width)) / 2;
             marginY = (paper.view.bounds.height - (paper.view.bounds.height * this.params.height)) / 2;
             
@@ -70,16 +72,14 @@ export default class Pillar {
             let noise1 = this.noise3D(x1/this.params.smoothing, y1/this.params.smoothing, this.params.seed)
             let noise2 = this.noise3D(x2/this.params.smoothing, y2/this.params.smoothing, this.params.seed)
 
-            x1 += noise1 * this.params.amp;
-            y1 += noise1 * this.params.amp;
+            x1 += noise1 * this.params.ampX;
+            y1 += noise1 * this.params.ampY;
 
-            x2 += noise2 * this.params.amp;
-            y2 += noise2 * this.params.amp;
+            x2 += noise2 * this.params.ampX;
+            y2 += noise2 * this.params.ampY;
 
-            new paper.Path.Line({
-                from: [x1, y1],
-                to: [x2, y2],
-            })
+            path.add([x1, y1])
+            path.add([x2, y2])
         }
     }
 
@@ -115,8 +115,13 @@ export default class Pillar {
             this.reset();
         });
 
-        noise.add(this.params, 'amp', 0, 200).step(0.001).onChange((value) => {
-            this.params.amp = value;
+        noise.add(this.params, 'ampX', 0, 200).step(0.001).onChange((value) => {
+            this.params.ampX = value;
+            this.reset();
+        });
+
+        noise.add(this.params, 'ampY', 0, 200).step(0.001).onChange((value) => {
+            this.params.ampY = value;
             this.reset();
         });
 
