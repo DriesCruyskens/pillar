@@ -10,14 +10,14 @@ export default class Pillar {
       drawFabric: false,
 
       seed: Math.random() * 2000,
-      smoothing: 100,
+      smoothing: 44,
       ampX: 40,
-      ampY: 40,
+      ampY: 26,
 
-      height: 0.7,
-      width: 0.3,
-      n_lines: 300,
-      n_vertices: 100,
+      height: 0.8,
+      width: 0.2,
+      n_lines: 380,
+      n_vertices: 1,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
