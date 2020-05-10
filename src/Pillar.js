@@ -115,6 +115,7 @@ export default class Pillar {
     shape
       .add(this.params, "n_lines", 0, 500)
       .step(1)
+      .listen()
       .onChange((value) => {
         this.params.n_lines = value;
         this.reset();
@@ -123,6 +124,7 @@ export default class Pillar {
     shape
       .add(this.params, "n_vertices", 1, 500)
       .step(1)
+      .listen()
       .onChange((value) => {
         this.params.n_vertices = value;
         this.reset();
@@ -131,6 +133,7 @@ export default class Pillar {
     shape
       .add(this.params, "width", 0, 1)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.width = value;
         this.reset();
@@ -139,6 +142,7 @@ export default class Pillar {
     shape
       .add(this.params, "height", 0, 1)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.height = value;
         this.reset();
@@ -149,6 +153,7 @@ export default class Pillar {
     noise
       .add(this.params, "seed", 0, 2000)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.seed = value;
         this.reset();
@@ -157,6 +162,7 @@ export default class Pillar {
     noise
       .add(this.params, "smoothing", 0, 200)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.smoothing = value;
         this.reset();
@@ -165,6 +171,7 @@ export default class Pillar {
     noise
       .add(this.params, "ampX", 0, 200)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.ampX = value;
         this.reset();
@@ -173,6 +180,7 @@ export default class Pillar {
     noise
       .add(this.params, "ampY", 0, 200)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.ampY = value;
         this.reset();
@@ -183,15 +191,19 @@ export default class Pillar {
     style
       .add(this.params, "strokeWidth", 0, 5)
       .step(0.001)
+      .listen()
       .onChange((value) => {
         this.params.strokeWidth = value;
         this.reset();
       });
 
-    style.add(this.params, "drawFabric").onChange((value) => {
-      this.params.drawFabric = value;
-      this.reset();
-    });
+    style
+      .add(this.params, "drawFabric")
+      .listen()
+      .onChange((value) => {
+        this.params.drawFabric = value;
+        this.reset();
+      });
 
     this.gui.add(this, "exportSVG").name("Export SVG");
   }
