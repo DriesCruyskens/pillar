@@ -12,21 +12,21 @@ export default class Pillar {
 
       // noise
       seed: Math.random() * 2000,
-      smoothing: 44,
+      smoothing: 20,
       ampX: 1,
       ampY: 1,
 
       // shape
-      height: 0.8,
+      height: 0.9,
       width: 0.3,
-      n_lines: 350,
-      n_vertices: 4,
+      n_lines: 450,
+      n_vertices: 5,
       straightEdges: true,
 
       // exponential center amplitude
       enableExpCenterAmp: true,
-      exponent: 0.92,
-      base: 100,
+      exponent: 0.8,
+      base: 20,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
@@ -218,8 +218,9 @@ export default class Pillar {
       });
 
     exp
-      .add(this.params, "base", 0, 10000)
-      .step(1)
+      .add(this.params, "base")
+      .min(0)
+      .step(0.1)
       .listen()
       .onChange((value) => {
         this.reset();
