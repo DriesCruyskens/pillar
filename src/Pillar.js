@@ -18,6 +18,7 @@ export default class Pillar {
       width: 0.2,
       n_lines: 380,
       n_vertices: 1,
+      straightEdges: true,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
@@ -85,7 +86,10 @@ export default class Pillar {
           this.params.seed
         );
 
-        x1 += noise * this.params.ampX;
+        if (!this.params.straightEdges) {
+          x1 += noise * this.params.ampX;
+        }
+        
         y1 += noise * this.params.ampY;
 
         path.add([x1, y1]);
@@ -117,16 +121,21 @@ export default class Pillar {
       .step(1)
       .listen()
       .onChange((value) => {
-        this.params.n_lines = value;
         this.reset();
       });
 
     shape
-      .add(this.params, "n_vertices", 1, 500)
+      .add(this.params, "n_vertices", 1, 50)
       .step(1)
       .listen()
       .onChange((value) => {
-        this.params.n_vertices = value;
+        this.reset();
+      });
+
+      shape
+      .add(this.params, "straightEdges")
+      .listen()
+      .onChange((value) => {
         this.reset();
       });
 
@@ -135,7 +144,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.width = value;
         this.reset();
       });
 
@@ -144,7 +152,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.height = value;
         this.reset();
       });
 
@@ -155,7 +162,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.seed = value;
         this.reset();
       });
 
@@ -164,7 +170,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.smoothing = value;
         this.reset();
       });
 
@@ -173,7 +178,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.ampX = value;
         this.reset();
       });
 
@@ -182,7 +186,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.ampY = value;
         this.reset();
       });
 
@@ -193,7 +196,6 @@ export default class Pillar {
       .step(0.001)
       .listen()
       .onChange((value) => {
-        this.params.strokeWidth = value;
         this.reset();
       });
 
@@ -201,7 +203,6 @@ export default class Pillar {
       .add(this.params, "drawFabric")
       .listen()
       .onChange((value) => {
-        this.params.drawFabric = value;
         this.reset();
       });
 
