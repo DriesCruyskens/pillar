@@ -6,19 +6,27 @@ import { saveAs } from "file-saver";
 export default class Pillar {
   constructor(canvas_id) {
     this.params = {
+      // style
       strokeWidth: 1.0,
       drawFabric: false,
 
+      // noise
       seed: Math.random() * 2000,
       smoothing: 44,
-      ampX: 40,
-      ampY: 26,
+      ampX: 1,
+      ampY: 1,
 
+      // shape
       height: 0.8,
-      width: 0.2,
-      n_lines: 380,
-      n_vertices: 1,
+      width: 0.3,
+      n_lines: 350,
+      n_vertices: 4,
       straightEdges: true,
+
+      // exponential center amplitude
+      enableExpCenterAmp: true,
+      exponent: 0.92,
+      base: 100,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
@@ -66,7 +74,7 @@ export default class Pillar {
     const n_vertices = this.params.n_vertices;
     const n_lines = this.params.n_lines;
 
-    let x1, y1, noise, marginX, marginY, path;
+    let x, y, noise, marginX, marginY, path, expAmp;
 
     for (let i = 0; i < this.params.n_lines; i++) {
       path = new paper.Path();
@@ -77,27 +85,46 @@ export default class Pillar {
       // j needs to be smaller or equal to n_vertices
       // for the sketch to be centered.
       for (let j = 0; j <= n_vertices; j++) {
-        x1 = marginX + ((viewWidth * this.params.width) / n_vertices) * j;
-        y1 = marginY + ((viewHeight * this.params.height) / n_lines) * i;
+        x = marginX + ((viewWidth * this.params.width) / n_vertices) * j;
+        y = marginY + ((viewHeight * this.params.height) / n_lines) * i;
 
         noise = this.noise3D(
-          x1 / this.params.smoothing,
-          y1 / this.params.smoothing,
+          x / this.params.smoothing,
+          y / this.params.smoothing,
           this.params.seed
         );
 
-        if (!this.params.straightEdges) {
-          x1 += noise * this.params.ampX;
+        // Initialise exponential amplitude to one so it doesn't break later.
+        expAmp = 1;
+        // If exponential center amplitude is enabled:
+        if (this.params.enableExpCenterAmp) {
+          // Get amplitude (closer to center = higher)
+          expAmp = this.expCenterAmp(
+            x,
+            y,
+            this.params.width * paper.view.bounds.width
+          );
+          // Magic
+          expAmp = Math.pow(expAmp.map(0, this.params.base, 0, 5), 3);
+          // Clamp at 0.
+          expAmp = Math.max(0, expAmp);
         }
-        
-        y1 += noise * this.params.ampY;
 
-        path.add([x1, y1]);
+        // Don't change x-value if straight edges are enabled.
+        if (!this.params.straightEdges) {
+          x += noise * this.params.ampX * expAmp;
+        }
+
+        // Add noise times amplitudes to y-value.
+        y += noise * this.params.ampY * expAmp;
+
+        path.add([x, y]);
       }
 
       path.smooth();
     }
 
+    // Vertically connects vertices.
     if (this.params.drawFabric) {
       // Got to make a copy otherwise the forEach includes new paths.
       const children = [...paper.project.activeLayer.children];
@@ -109,6 +136,23 @@ export default class Pillar {
         p.smooth();
       }
     }
+  }
+
+  // Noise amplitudes are higher towards the center using exponentiation.
+  expCenterAmp(x, y, width) {
+    // Calculate distance between center and vertex.
+    let dist = this.center.getDistance([x, y]);
+
+    // Reverse map it so closer to center yields higher value.
+    let base = dist.map(0, width, this.params.base, 0);
+    // Clamp at 0.
+    base = Math.max(0, base);
+    // Calculate exponentiation with reverse distance as base.
+    let amp = Math.pow(base, this.params.exponent);
+    // Clamp at 0.
+    amp = Math.max(0, amp);
+
+    return amp;
   }
 
   init_gui() {
@@ -132,7 +176,7 @@ export default class Pillar {
         this.reset();
       });
 
-      shape
+    shape
       .add(this.params, "straightEdges")
       .listen()
       .onChange((value) => {
@@ -150,6 +194,32 @@ export default class Pillar {
     shape
       .add(this.params, "height", 0, 1)
       .step(0.001)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    let exp = this.gui.addFolder("exp center amp");
+
+    exp
+      .add(this.params, "enableExpCenterAmp")
+      .name("enable")
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    exp
+      .add(this.params, "exponent", 0.7, 1.2)
+      .step(0.0001)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    exp
+      .add(this.params, "base", 0, 10000)
+      .step(1)
       .listen()
       .onChange((value) => {
         this.reset();
