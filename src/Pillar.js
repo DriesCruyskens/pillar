@@ -16,6 +16,11 @@ export default class Pillar {
       ampX: 1,
       ampY: 1,
 
+      // river
+      riverEnable: false,
+      riverAmp: 100,
+      riverSmooth: 500,
+
       // shape
       height: 0.9,
       width: 0.3,
@@ -25,6 +30,7 @@ export default class Pillar {
 
       // exponential center amplitude
       enableExpCenterAmp: true,
+      expWidth: 1,
       exponent: 0.8,
       base: 20,
     };
@@ -102,7 +108,7 @@ export default class Pillar {
           expAmp = this.expCenterAmp(
             x,
             y,
-            this.params.width * paper.view.bounds.width
+            this.params.width * paper.view.bounds.width * this.params.expWidth
           );
           // Magic
           expAmp = Math.pow(expAmp.map(0, this.params.base, 0, 5), 3);
@@ -113,6 +119,16 @@ export default class Pillar {
         // Don't change x-value if straight edges are enabled.
         if (!this.params.straightEdges) {
           x += noise * this.params.ampX * expAmp;
+        }
+
+        // 
+        if (this.params.riverEnable) {
+          let riverNoise = this.noise3D(
+            x / this.params.riverSmooth,
+            y / this.params.riverSmooth,
+            this.params.seed * 10
+          );
+          x += riverNoise * this.params.riverAmp;
         }
 
         // Add noise times amplitudes to y-value.
@@ -209,6 +225,14 @@ export default class Pillar {
         this.reset();
       });
 
+      exp
+      .add(this.params, "expWidth", 0, 1)
+      .step(.01)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
     exp
       .add(this.params, "exponent", 0.7, 1.2)
       .step(0.0001)
@@ -221,6 +245,32 @@ export default class Pillar {
       .add(this.params, "base")
       .min(0)
       .step(0.1)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    let river = this.gui.addFolder("river");
+
+    river
+      .add(this.params, "riverEnable")
+      .name("enable river")
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    river
+      .add(this.params, "riverAmp", 0, 100)
+      .name("river amplitude")
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    river
+      .add(this.params, "riverSmooth", 0, 1000)
+      .name("river smoothness")
       .listen()
       .onChange((value) => {
         this.reset();
@@ -245,7 +295,7 @@ export default class Pillar {
       });
 
     noise
-      .add(this.params, "ampX", 0, 200)
+      .add(this.params, "ampX", 0, 50)
       .step(0.001)
       .listen()
       .onChange((value) => {
@@ -253,7 +303,7 @@ export default class Pillar {
       });
 
     noise
-      .add(this.params, "ampY", 0, 200)
+      .add(this.params, "ampY", 0, 50)
       .step(0.001)
       .listen()
       .onChange((value) => {
