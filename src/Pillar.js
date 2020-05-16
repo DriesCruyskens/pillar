@@ -12,7 +12,8 @@ export default class Pillar {
 
       // noise
       seed: Math.random() * 2000,
-      smoothing: 20,
+      smoothX: 150,
+      smoothY: 20,
       ampX: 1,
       ampY: 1,
 
@@ -25,7 +26,7 @@ export default class Pillar {
       height: 0.9,
       width: 0.3,
       n_lines: 450,
-      n_vertices: 5,
+      n_vertices: 50,
       straightEdges: true,
 
       // exponential center amplitude
@@ -33,12 +34,20 @@ export default class Pillar {
       expWidth: 1,
       exponent: 0.8,
       base: 20,
+
+      // round corners
+      rounded: false,
+      howRound: 0.3,
     };
 
     Number.prototype.map = function (in_min, in_max, out_min, out_max) {
       return (
         ((this - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
       );
+    };
+
+    Number.prototype.clamp = function clamp(min, max) {
+      return this <= min ? min : this >= max ? max : this;
     };
 
     // Initialise dat.gui, paperjs and opensimplex noise
@@ -82,7 +91,7 @@ export default class Pillar {
 
     let x, y, noise, marginX, marginY, path, expAmp;
 
-    for (let i = 0; i < this.params.n_lines; i++) {
+    for (let i = 0; i < n_lines; i++) {
       path = new paper.Path();
 
       marginX = (viewWidth - viewWidth * this.params.width) / 2;
@@ -94,9 +103,42 @@ export default class Pillar {
         x = marginX + ((viewWidth * this.params.width) / n_vertices) * j;
         y = marginY + ((viewHeight * this.params.height) / n_lines) * i;
 
+        if (this.params.rounded) {
+          let ni = i.clamp(0, n_lines * this.params.howRound);
+          let t = ni.map(0, n_lines * this.params.howRound, 0, 1);
+          let ease = 1 + --t * t * t * t * t;
+          let threshL = ease.map(0, 1, this.center.x, marginX);
+          // Mirror left threshold to right side
+          let threshR = threshL.map(
+            this.center.x,
+            marginX,
+            this.center.x,
+            viewWidth - marginX
+          );
+
+          ni = i.clamp(n_lines * (1 - this.params.howRound), n_lines);
+          t = ni.map(n_lines * (1 - this.params.howRound), n_lines, 1, 0);
+          ease = 1 + --t * t * t * t * t;
+          threshL = Math.max(ease.map(0, 1, this.center.x, marginX), threshL);
+          // Mirror left threshold to right side
+          threshR = threshL.map(
+            this.center.x,
+            marginX,
+            this.center.x,
+            viewWidth - marginX
+          );
+
+          if (x < threshL) {
+            x = threshL;
+          } else if (x > threshR) {
+            x = threshR;
+          }
+        }
+
+        // Get noise value depending on coordinates.
         noise = this.noise3D(
-          x / this.params.smoothing,
-          y / this.params.smoothing,
+          x / this.params.smoothX,
+          y / this.params.smoothY,
           this.params.seed
         );
 
@@ -121,7 +163,7 @@ export default class Pillar {
           x += noise * this.params.ampX * expAmp;
         }
 
-        // 
+        // Enables a seperate noise value for x-values.
         if (this.params.riverEnable) {
           let riverNoise = this.noise3D(
             x / this.params.riverSmooth,
@@ -177,7 +219,7 @@ export default class Pillar {
     let shape = this.gui.addFolder("shape");
 
     shape
-      .add(this.params, "n_lines", 0, 500)
+      .add(this.params, "n_lines", 0, 600)
       .step(1)
       .listen()
       .onChange((value) => {
@@ -185,7 +227,7 @@ export default class Pillar {
       });
 
     shape
-      .add(this.params, "n_vertices", 1, 50)
+      .add(this.params, "n_vertices", 1, 500)
       .step(1)
       .listen()
       .onChange((value) => {
@@ -225,9 +267,9 @@ export default class Pillar {
         this.reset();
       });
 
-      exp
+    exp
       .add(this.params, "expWidth", 0, 1)
-      .step(.01)
+      .step(0.01)
       .listen()
       .onChange((value) => {
         this.reset();
@@ -250,6 +292,23 @@ export default class Pillar {
         this.reset();
       });
 
+    let round = this.gui.addFolder("round corners");
+
+    round
+      .add(this.params, "rounded")
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    round
+      .add(this.params, "howRound", 0, 1)
+      .step(0.001)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
     let river = this.gui.addFolder("river");
 
     river
@@ -261,7 +320,7 @@ export default class Pillar {
       });
 
     river
-      .add(this.params, "riverAmp", 0, 100)
+      .add(this.params, "riverAmp", 0, 700)
       .name("river amplitude")
       .listen()
       .onChange((value) => {
@@ -270,6 +329,7 @@ export default class Pillar {
 
     river
       .add(this.params, "riverSmooth", 0, 1000)
+      .step(1)
       .name("river smoothness")
       .listen()
       .onChange((value) => {
@@ -287,7 +347,15 @@ export default class Pillar {
       });
 
     noise
-      .add(this.params, "smoothing", 0, 200)
+      .add(this.params, "smoothY", 0, 200)
+      .step(0.001)
+      .listen()
+      .onChange((value) => {
+        this.reset();
+      });
+
+    noise
+      .add(this.params, "smoothX", 0, 200)
       .step(0.001)
       .listen()
       .onChange((value) => {
