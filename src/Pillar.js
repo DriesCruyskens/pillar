@@ -1,4 +1,4 @@
-import * as dat from "dat-gui";
+import * as dat from "dat.gui";
 import { makeNoise3D } from "open-simplex-noise";
 import * as paper from "paper";
 import { saveAs } from "file-saver";
@@ -51,7 +51,6 @@ export default class Pillar {
     };
 
     // Initialise dat.gui, paperjs and opensimplex noise
-    this.gui = new dat.GUI();
     this.canvas = document.getElementById(canvas_id);
     paper.setup(this.canvas);
     this.noise3D = makeNoise3D(Date.now());
@@ -214,6 +213,127 @@ export default class Pillar {
   }
 
   init_gui() {
+    // Initialisation
+    this.gui = new dat.GUI({
+      load: {
+        preset: "pillar",
+        closed: false,
+        remembered: {
+          shroud: {
+            "0": {
+              strokeWidth: 1,
+              drawFabric: false,
+              seed: 766.9699060768403,
+              smoothX: 20,
+              smoothY: 1100,
+              ampX: 1,
+              ampY: 1.7,
+              height: 0.9,
+              width: 0.3,
+              n_lines: 400,
+              n_vertices: 50,
+              straightEdges: true,
+              enableExpCenterAmp: true,
+              expWidth: 1,
+              exponent: 0.7,
+              base: 6,
+              rounded: false,
+              howRound: 0.3,
+              riverEnable: false,
+              riverAmp: 100,
+              riverSmooth: 500,
+            },
+          },
+          waves: {
+            "0": {
+              n_lines: 450,
+              n_vertices: 50,
+              straightEdges: true,
+              width: 0.3,
+              height: 0.9,
+              enableExpCenterAmp: true,
+              expWidth: 1,
+              exponent: 0.8,
+              base: 20,
+              rounded: false,
+              howRound: 0.3,
+              riverEnable: false,
+              riverAmp: 100,
+              riverSmooth: 500,
+              seed: 1614.708,
+              smoothY: 20,
+              smoothX: 150,
+              ampX: 1,
+              ampY: 1,
+              strokeWidth: 1,
+              drawFabric: false,
+            },
+          },
+          pillar: {
+            "0": {
+              n_lines: 470,
+              n_vertices: 1,
+              straightEdges: false,
+              width: 0.3,
+              height: 0.9,
+              enableExpCenterAmp: false,
+              expWidth: 1,
+              exponent: 0.7000000000000001,
+              base: 6,
+              rounded: false,
+              howRound: 0.3,
+              riverEnable: false,
+              riverAmp: 100,
+              riverSmooth: 500,
+              seed: 230.287,
+              smoothY: 59.549,
+              smoothX: 66.166,
+              ampX: 47.419000000000004,
+              ampY: 27.018,
+              strokeWidth: 1,
+              drawFabric: false,
+            },
+          },
+        },
+        folders: {
+          shape: {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+          "exp center amp": {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+          "round corners": {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+          river: {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+          noise: {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+          style: {
+            preset: "Default",
+            closed: true,
+            folders: {},
+          },
+        },
+      },
+    });
+
+    // Init presets
+    this.gui.remember(this.params);
+
+    // Folders and parameters
     this.gui.add(this, "randomize").name("Randomize");
 
     let shape = this.gui.addFolder("shape");
